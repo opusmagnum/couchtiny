@@ -102,7 +102,7 @@ class TestDocument < Test::Unit::TestCase
         assert @d.id
         assert @d.rev
       end
-      
+
       should "load respecting type_attr (under Foo)" do
         d = Foo.get @d.id
         f = Foo.get @f.id
@@ -117,7 +117,7 @@ class TestDocument < Test::Unit::TestCase
         assert_equal Bar, b.class
         assert_equal Foo, z.class
         assert_equal Unattached, u.class
-        
+
         assert_equal "a", d["tag"]
         assert_equal "b", f["tag"]
         assert_equal "b2", g["tag"]
@@ -147,8 +147,8 @@ class TestDocument < Test::Unit::TestCase
         assert_equal 4, res.size
         assert_equal ["a","b","b2","c"], res.collect { |r| r['tag'] }
         assert_equal [CouchTiny::Document, Foo, Foo, Bar], res.collect { |r| r.class }
-      end        
-        
+      end
+
       should "save update" do
         old_id = @f.id
         old_rev = @f.rev
@@ -164,13 +164,13 @@ class TestDocument < Test::Unit::TestCase
           Foo.get(@f.id)
         }
       end
-      
+
       context "attachments" do
         should "save and retrieve attachment" do
           @f.put_attachment "wibble", "foobar"
           assert_equal "foobar", @f.get_attachment("wibble")
         end
-        
+
         should "retrieve attachment info" do
           @f.put_attachment "wibble", "abc"
           f = Foo.get @f.id
@@ -178,13 +178,13 @@ class TestDocument < Test::Unit::TestCase
           assert !f.has_attachment?("bibble")
           assert_equal 3, f.attachment_info("wibble")["length"]
         end
-        
+
         should "save content type" do
           @f.put_attachment "wibble", "foobar", "application/x-foo"
           f = Foo.get @f.id
           assert_equal "application/x-foo", f['_attachments']['wibble']['content_type']
         end
-        
+
         should "destroy attachment" do
           @f.put_attachment "wibble", "foobar"
           @f.delete_attachment "wibble"
@@ -200,7 +200,7 @@ class TestDocument < Test::Unit::TestCase
             Unattached.get @u.id
           }
         end
-        
+
         should "load on database" do
           b = Unattached.on(Foo.database).get @u.id
           assert_equal Unattached, b.class
@@ -233,7 +233,7 @@ class TestDocument < Test::Unit::TestCase
           assert_equal ["id","key","value"], res.first.keys.sort
           assert_equal ["a","b","b2","c","d","e"], res.collect {|r| r['key'] }
         end
-        
+
         should "return docs" do
           res = Foo.view_test_by_tag :include_docs=>true
           assert_equal 6, res.size
@@ -296,14 +296,14 @@ class TestDocument < Test::Unit::TestCase
           assert_equal "d", res[1]['tag']
         end
       end
-      
+
       context "all view" do
         should "count" do
           assert_equal 2, Foo.count
           assert_equal 1, Bar.count
           assert_equal 1, CouchTiny::Document.on(Foo.database).count # type=nil
         end
-        
+
         # Note: these are quite inefficient as they force a re-reduce across
         # the database. Better just to read the overall reduced value (see
         # "count grouped" below) and add the elements required.
@@ -311,11 +311,11 @@ class TestDocument < Test::Unit::TestCase
           assert_equal 4, Foo.count(:startkey=>"e")  # gives Foo x 2, Unattached, Zog
           assert_equal 3, Foo.count(:keys=>["Foo","Bar"], :group=>true)
         end
-        
+
         should "count all_classes" do
           assert_equal 6, Foo.count(:all_classes=>true)
         end
-        
+
         should "all" do
           fs = Foo.all
           assert_equal [Foo, Foo], fs.collect {|r| r.class}
@@ -360,21 +360,21 @@ class TestDocument < Test::Unit::TestCase
           counts = Foo.all(:all_classes=>true, :reduce=>true).first['value']
           assert_equal({'null'=>1, 'Bar'=>1, 'Foo'=>2, 'Zog'=>1, 'Unattached'=>1}, counts)
         end
-        
+
         should "work on specified database" do
           assert_equal 1, Unattached.on(Foo.database).count
           assert_equal 1, Unattached.on(Foo.database).all.size
         end
       end
     end
-    
+
     should "create!" do
       res = Foo.create!('_id' => 'hello')
       assert_equal Foo, res.class
       assert_equal 'hello', res.id
       Foo.get('hello')
     end
-    
+
     context "bulk save" do
       setup do
         # Note that this works for documents not yet associated with
@@ -418,7 +418,7 @@ class TestDocument < Test::Unit::TestCase
         Foo.bulk_save [n]
         assert n['_id']
         assert_equal "Foo", n['type']
-        
+
         m = Bar.get n['_id']
         assert_equal Foo, m.class
       end
@@ -437,7 +437,7 @@ class TestDocument < Test::Unit::TestCase
         assert_equal Bar, b.class
         assert_equal Foo, z.class
         assert_equal Unattached, u.class
-        
+
         assert_equal "a", d["tag"]
         assert_equal "b", f["tag"]
         assert_equal "b2", g["tag"]
@@ -454,7 +454,7 @@ class TestDocument < Test::Unit::TestCase
         assert_equal old_id, @f.id
         assert_not_equal old_rev, @f.rev
       end
-      
+
       should "bulk_destroy" do
         assert_equal 6, Foo.count(:all_classes => true)
         res = Foo.bulk_destroy [@b, @z]
@@ -478,11 +478,11 @@ class TestDocument < Test::Unit::TestCase
       assert_equal 'type', Foo.type_attr
       assert_equal 'Foo', Foo.type_name
     end
-    
+
     should "have write accessors" do
       begin
         db = Foo.class_eval { instance_variable_get :@database }
-        
+
         Foo.use_database :dummy1
         Foo.use_design_doc CouchTiny::Design.new('Foo-', true)
         Foo.use_type_attr 'my-type'
@@ -506,7 +506,7 @@ class TestDocument < Test::Unit::TestCase
         }
       end
     end
-    
+
     should "override in subclass only" do
       begin
         Bar.use_database :dummy1
@@ -540,7 +540,7 @@ class TestDocument < Test::Unit::TestCase
       @klass.use_database Foo.database
       @klass.database.recreate_database!
     end
-    
+
     should "cleanup_design_docs!" do
       id1 = @klass.design_doc.id
 
@@ -551,13 +551,13 @@ class TestDocument < Test::Unit::TestCase
       @klass.define_view "view2", "function(doc){emit(null,null);}"
       id3 = @klass.design_doc.id
       @klass.view_view2
-      
+
       assert_equal 3, [id1, id2, id3].uniq.size
       assert_equal [id2, id3].sort,
                    @klass.database.all_docs['rows'].map { |d| d['id'] }.sort
-      
+
       @klass.cleanup_design_docs!
-      
+
       assert_equal [id3], @klass.database.all_docs['rows'].map { |d| d['id'] }
     end
   end
@@ -574,11 +574,11 @@ class TestDocument < Test::Unit::TestCase
     setup do
       Foo.database.recreate_database!
     end
-    
+
     should "invoke callbacks" do
       @foo = CB.new("hello"=>"world","idattr"=>"12345")
       assert_equal [:after_initialize], @foo.log
-      
+
       @foo.log.clear
       @foo.save!
       assert_equal "12345", @foo.id
@@ -590,13 +590,13 @@ class TestDocument < Test::Unit::TestCase
 
       res = CB.get "12345"
       assert_equal [:after_find, :after_initialize], res.log
-      
+
       @foo.log.clear
       @foo.destroy
       assert_equal [:before_destroy, :after_destroy], @foo.log
     end
   end
-  
+
   context "Callbacks with bulk_save" do
     setup do
       Foo.database.recreate_database!
@@ -663,7 +663,7 @@ class TestDocument < Test::Unit::TestCase
       assert_equal [2,93,94], CB.all.collect { |c| c['val'] }.sort
     end
   end
-  
+
   should "have auto accessor" do
     f = AA.new
     f.hello = "world"
@@ -680,9 +680,9 @@ class TestDocument < Test::Unit::TestCase
     Object.send(:remove_const, :Flurble)
     class ::Flurble < CouchTiny::Document; end
     klass2 = ::Flurble
-    
+
     assert klass1 != klass2, "I expect a new Flurble class object"
-    
+
     res = CouchTiny::Document.on(Foo.database).get('test')
     assert ::Flurble === res, "The loaded object should be of the new #{klass2} class (#{klass2.object_id}), but it was #{res.class} (#{res.class.object_id})"
   end
@@ -693,7 +693,7 @@ class TestDocument < Test::Unit::TestCase
       assert_equal Bar, res.class
       assert_equal "def", res["abc"]
     end
-    
+
     should "default to model class" do
       res = Foo.instantiate({"type"=>"junk", "abc"=>"def"})
       assert_equal Foo, res.class
@@ -734,6 +734,29 @@ class TestDocument < Test::Unit::TestCase
       res = Foo.get "fred", :open_revs=>:all
       assert res.is_a?(Array)
       assert_equal ["eccles","moriarty"], res.collect { |r| r["friend"] }.sort
+    end
+  end
+
+  context "initialization from hash" do
+    should "lead to same the content as building document with []= setter." do
+      user1 = Foo.new()
+      user1[:email] = 'user1@example.com'
+      user1['age'] = 33
+      user1.save!
+      assert_not_nil user1[:email]
+      assert_not_nil user1['email']
+
+      user2 = Foo.new({
+        :email => 'user2@example.com',
+        'age' => 37
+      })
+      assert_not_nil user2[:email]
+      assert_not_nil user2['email']
+      assert_not_nil user2[:age]
+      assert_not_nil user2['age']
+      user2.save!
+      assert_not_nil user2[:email]
+      assert_not_nil user2['email']
     end
   end
 end

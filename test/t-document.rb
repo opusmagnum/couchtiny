@@ -1,6 +1,7 @@
 require File.join(File.dirname(__FILE__),'test_helper')
 require 'couchtiny'
 require 'couchtiny/document'
+require 'couchtiny/uuids/time'
 
 class Foo < CouchTiny::Document
   use_database CouchTiny::Database.new(

@@ -30,7 +30,7 @@ module CouchTiny
           define_method("#{name}=") { |val| self[name] = val }
         }
       end
-          
+
       property_builder(String, :string) do |klass, name, opts|
         klass.class_eval {
           define_method(name) { self[name].to_s }
@@ -87,14 +87,19 @@ module CouchTiny
       # method takes a single Hash)
       #
       #    property :foo, :type=>Bar
-      
+
       def property(name, opts={})
         type = opts[:type]
         if builder = BUILDER_MAP[type]
           builder.call(self, name, opts)
         else
           # some arbitrary object
-          define_method(name) { type.new(self[name] ||= {}) }
+          define_method(name) {
+            res = type.new
+            # connect to subhash
+            res.doc = self[name] ||= {}
+            res
+          }
           define_method("#{name}=") { |val|
             case val
             when nil

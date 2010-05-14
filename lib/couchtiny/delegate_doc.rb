@@ -5,7 +5,9 @@ module CouchTiny
     attr_accessor :doc
 
     def initialize(doc = {})
-      @doc = doc.to_hash
+      # Copy the values from the input parameter.
+      @doc = {}
+      doc.to_hash.each {|k,v| self[k] = v}
     end
 
     def to_hash
@@ -28,15 +30,15 @@ module CouchTiny
     def [](k)
       @doc[k.to_s]
     end
-    
+
     def []=(k,v)
       @doc[k.to_s] = v
     end
-    
+
     def key?(k)
       @doc.key?(k)
     end
-    
+
     def has_key?(k)
       @doc.has_key?(k)
     end
